@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import '../App.css';
+import React from 'react';
 
-const Book = () => {
+export interface BookProps {
+    id: number;
+    title: string;
+    author: string;
+    year: number;
+    image: string;
+}
 
-
+const Book: React.FC<BookProps> = ({ title, author, year, image }) => {
     return (
-      <div className='Book'>
-        <img src='#' alt='book' />
-        <div className='bookTitle'>Title</div>
-        <div className='bookAuthor'>Author</div>
-        <div className='bookYear'>Year</div>
-      </div>
+        <div className='Book'>
+            <div className='bookTitle'>{title}</div>
+            <img src={`./images/${image}`} alt={title} />
+            <div className='bookAuthor'>{author}</div>
+            <div className='bookYear'>{year}</div>
+        </div>
     );
 };
 
