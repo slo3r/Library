@@ -18,43 +18,45 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   return (
     <form onSubmit={handleSearch}>
       <div>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <button type="submit">Search</button>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button type="submit">Search</button>
       </div>
-      <div>
-        <label>
-          <input
-            type="radio"
-            value="title"
-            checked={searchType === 'title'}
-            onChange={(e) => setSearchType(e.target.value)}
+      <div className='searchFilters'>
+          <label>
+            <input
+              type="radio"
+              value="title"
+              checked={searchType === 'title'}
+              onChange={(e) => setSearchType(e.target.value)}
+            />
+            Title
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="author"
+              checked={searchType === 'author'}
+              onChange={(e) => setSearchType(e.target.value)}
+            />
+            Author
+          </label>
+        <div>
+          <label>
+            Year Range: <b>{yearRange[0]}</b> - <b>{yearRange[1]}</b>
+          </label>
+          <Slider
+            range
+            min={1600}
+            max={new Date().getFullYear()}
+            defaultValue={yearRange}
+            onChange={(value) => setYearRange(value as [number, number])}
           />
-          Title
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="author"
-            checked={searchType === 'author'}
-            onChange={(e) => setSearchType(e.target.value)}
-          />
-          Author
-        </label>
-      <label>
-          Year Range: <b>{yearRange[0]}</b> - <b>{yearRange[1]}</b>
-        </label>
-        <Slider
-          range
-          min={1600}
-          max={new Date().getFullYear()}
-          defaultValue={yearRange}
-          onChange={(value) => setYearRange(value as [number, number])}
-          />
+        </div>
       </div>
     </form>
   );

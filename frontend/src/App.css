@@ -97,10 +97,16 @@ button:active {
   background-color: #004099; 
 }
 
-label{
-  margin-right: 10px;
+.searchFilters{
+  display: flex;
+  justify-content: space-between;
+  width: 330px;
 }
+
 .rc-slider {
   max-width: 190px;
-  margin-left: auto;
+}
+
+.searchFilters{
+  display: flex;
 }
