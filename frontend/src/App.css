@@ -59,6 +59,7 @@ form {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   gap: 10px; 
   margin: 20px;
 }
@@ -70,6 +71,7 @@ input[type="text"] {
   border-radius: 5px;
   outline: none; 
   width: 240px; 
+  margin-right: 10px;
 }
 
 input[type="text"]:focus {
@@ -93,4 +95,12 @@ button:hover {
 
 button:active {
   background-color: #004099; 
+}
+
+label{
+  margin-right: 10px;
+}
+.rc-slider {
+  max-width: 190px;
+  margin-left: auto;
 }

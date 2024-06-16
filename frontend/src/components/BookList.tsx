@@ -1,33 +1,31 @@
-// BookList.tsx
-import React, { useState, useEffect } from 'react';
-import Book from './Book';
+import React, { useEffect, useState } from 'react';
+import Book, { BookProps } from './Book';
 
-interface BookProps {
+interface BookData extends BookProps {
   id: number;
-  title: string;
-  author: string;
-  year: number;
-  image: string;
 }
 
-const BookList: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
-  const [books, setBooks] = useState<BookProps[]>([]);
+interface BookListProps {
+  searchType: string;
+  searchTerm: string;
+  startYear: number;
+  endYear: number;
+}
+
+const BookList: React.FC<BookListProps> = ({ searchType, searchTerm, startYear, endYear }) => {
+  const [books, setBooks] = useState<BookData[]>([]);
 
   useEffect(() => {
     fetchBooks();
-  }, [searchTerm]);
+  }, [searchType, searchTerm, startYear, endYear]);
 
   const fetchBooks = async () => {
     try {
-      let url = 'http://localhost:5000/books';
-      if (searchTerm) {
-        url = `http://localhost:5000/search?term=${encodeURIComponent(searchTerm)}`;
-      }
-      const response = await fetch(url);
+      const response = await fetch(`http://localhost:5000/search?type=${searchType}&term=${searchTerm}&startYear=${startYear}&endYear=${endYear}`);
       if (!response.ok) {
         throw new Error('Failed to fetch books');
       }
-      const data: BookProps[] = await response.json();
+      const data: BookData[] = await response.json();
       setBooks(data);
     } catch (error) {
       console.error('Error fetching books:', error);

@@ -41,17 +41,31 @@ app.get('/books', (req: Request, res: Response) => {
     });
 });
 app.get('/search', (req: Request, res: Response) => {
-    const searchTerm = req.query.term;
-    const sql = 'SELECT * FROM books WHERE title LIKE ?'; 
-    db.query(sql, [`%${searchTerm}%`], (err, result) => {
-        if (err) {
-            console.error('Error executing MySQL query: ', err);
-            res.status(500).json({ error: 'Error executing MySQL query' });
-            return;
-        }
-        res.json(result);
+    const { type, term, startYear, endYear } = req.query;
+    
+    let sql = 'SELECT * FROM books WHERE ';
+    const params: (string | number)[] = [];
+  
+    if (type === 'title') {
+      sql += 'title LIKE ? AND ';
+      params.push(`%${term}%`);
+    } else if (type === 'author') {
+      sql += 'author LIKE ? AND ';
+      params.push(`%${term}%`);
+    }
+  
+    sql += 'year BETWEEN ? AND ?';
+    params.push(Number(startYear), Number(endYear));
+  
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        console.error('Error executing MySQL query: ', err);
+        res.status(500).json({ error: 'Error executing MySQL query' });
+        return;
+      }
+      res.json(result);
     });
-});
+  });
 
 
 // Start server
