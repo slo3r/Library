@@ -8,12 +8,6 @@ const AdminPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
 
 
-  useEffect(() => {
-    let username = prompt('Username:');
-    let password = prompt('Password:');
-    console.log(username, password);
-
-  }, []);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

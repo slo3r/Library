@@ -1,11 +1,17 @@
 import express, { Express, Request, Response } from 'express';
-import { createConnection } from 'mysql2';
+import { createConnection, RowDataPacket } from 'mysql2';
+import bcrypt from 'bcrypt';
+import bodyParser from 'body-parser';
 import fileUpload, { UploadedFile } from 'express-fileupload';
 import path from 'path';
 import fs from 'fs';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload());
 
 // MySQL connection 
 const db = createConnection({
@@ -29,10 +35,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Enable files upload
-app.use(fileUpload());
-
-// Ensure directory existence
 const ensureDirectoryExistence = (filePath: string) => {
   const dirname = path.dirname(filePath);
   if (fs.existsSync(dirname)) {
@@ -42,10 +44,8 @@ const ensureDirectoryExistence = (filePath: string) => {
   fs.mkdirSync(dirname);
 };
 
-// Static folder for images
 app.use('/images', express.static(path.join(__dirname, '../../frontend/public/images')));
 
-// Routes
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!!!');
 });
@@ -89,6 +89,48 @@ app.get('/search', (req: Request, res: Response) => {
   });
 });
 
+// Route for user login
+app.post('/login', (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  console.log('Login attempt:', { username, password });
+
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password are required.' });
+    return;
+  }
+
+  const sql = 'SELECT username, password FROM users WHERE username = ?';
+
+  db.query(sql, [username], async (err, result) => {
+    if (err) {
+      console.error('Error executing MySQL query: ', err);
+      res.status(500).json({ error: 'Error executing MySQL query' });
+      return;
+    }
+
+    const rows = result as RowDataPacket[];
+
+    if (rows.length === 0) {
+      console.log('Username not found');
+      res.status(401).json({ error: 'Invalid username or password.' });
+      return;
+    }
+
+    const user = rows[0];
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      console.log('Password does not match');
+      res.status(401).json({ error: 'Invalid username or password.' });
+      return;
+    }
+
+    console.log('Login successful');
+    res.json({ message: 'Login successful!' });
+  });
+});
+
 // Route to add a new book
 app.post('/add-book', async (req: Request, res: Response) => {
   const { title, author, year } = req.body;
@@ -102,14 +144,11 @@ app.post('/add-book', async (req: Request, res: Response) => {
   const imageDir = path.join(__dirname, '../../frontend/public/images');
   const imagePath = path.join(imageDir, file.name);
 
-  // Ensure the directory exists
   ensureDirectoryExistence(imagePath);
 
-  // Debug: Log paths
   console.log('Directory Path:', imageDir);
   console.log('File Path:', imagePath);
 
-  // Use mv() to place the file in the correct directory
   file.mv(imagePath, (err: any) => {
     if (err) {
       console.error('Error moving file: ', err);
@@ -129,7 +168,6 @@ app.post('/add-book', async (req: Request, res: Response) => {
   });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
