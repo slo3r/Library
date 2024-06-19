@@ -168,6 +168,66 @@ app.post('/add-book', async (req: Request, res: Response) => {
   });
 });
 
+// Route to edit a book
+app.put('/edit-book/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { title, author, year } = req.body;
+  const file = req.files?.image as UploadedFile;
+
+  if (!title || !author || !year) {
+    res.status(400).json({ error: 'All fields are required.' });
+    return;
+  }
+
+  let sql = 'UPDATE books SET title = ?, author = ?, year = ?';
+  const params: (string | number)[] = [title, author, year];
+
+  if (file) {
+    const imageDir = path.join(__dirname, '../../frontend/public/images');
+    const imagePath = path.join(imageDir, file.name);
+
+    ensureDirectoryExistence(imagePath);
+
+    file.mv(imagePath, (err: any) => {
+      if (err) {
+        console.error('Error moving file: ', err);
+        res.status(500).json({ error: 'Error moving file' });
+        return;
+      }
+    });
+
+    sql += ', image = ?';
+    params.push(file.name);
+  }
+
+  sql += ' WHERE id = ?';
+  params.push(Number(id));
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error('Error executing MySQL query: ', err);
+      res.status(500).json({ error: 'Error executing MySQL query' });
+      return;
+    }
+    res.json({ message: 'Book updated successfully!' });
+  });
+});
+
+// Route to delete a book
+app.delete('/delete-book/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM books WHERE id = ?';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error executing MySQL query: ', err);
+      res.status(500).json({ error: 'Error executing MySQL query' });
+      return;
+    }
+    res.json({ message: 'Book deleted successfully!' });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
