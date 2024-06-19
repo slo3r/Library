@@ -62,6 +62,42 @@ app.get('/books', (req: Request, res: Response) => {
   });
 });
 
+app.get('/books-search', (req: Request, res: Response) => {
+  const { title, author, startYear, endYear } = req.query;
+
+  let sql = 'SELECT * FROM books WHERE 1=1';
+  const params: (string | number)[] = [];
+
+  if (title) {
+    sql += ' AND title LIKE ?';
+    params.push(`%${title}%`);
+  }
+
+  if (author) {
+    sql += ' AND author LIKE ?';
+    params.push(`%${author}%`);
+  }
+
+  if (startYear) {
+    sql += ' AND year >= ?';
+    params.push(Number(startYear));
+  }
+
+  if (endYear) {
+    sql += ' AND year <= ?';
+    params.push(Number(endYear));
+  }
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error('Error executing MySQL query: ', err);
+      res.status(500).json({ error: 'Error executing MySQL query' });
+      return;
+    }
+    res.json(result);
+  });
+});
+
 app.get('/search', (req: Request, res: Response) => {
   const { type, term, startYear, endYear } = req.query;
 

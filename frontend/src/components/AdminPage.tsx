@@ -11,16 +11,22 @@ const AdminPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
 
+  // Search state
+  const [searchTitle, setSearchTitle] = useState('');
+  const [searchAuthor, setSearchAuthor] = useState('');
+  const [searchStartYear, setSearchStartYear] = useState<number | '1600'>('1600');
+  const [searchEndYear, setSearchEndYear] = useState<number | '2024'>('2024');
+
   useEffect(() => {
     fetchBooks();
   }, []);
 
-  const fetchBooks = async () => {
+  const fetchBooks = async (searchParams = {}) => {
     try {
-      const response = await fetch('http://localhost:5000/books');
+      const query = new URLSearchParams(searchParams).toString();
+      const response = await fetch(`http://localhost:5000/books-search?${query}`);
       const data = await response.json();
       setBooks(data);
-      console.log(data);
     } catch (error) {
       console.error('Error fetching books:', error);
     }
@@ -55,7 +61,7 @@ const AdminPage: React.FC = () => {
       setAuthor('');
       setYear('');
       setImage(null);
-      fetchBooks();
+      fetchBooks(); // Refresh the book list
     } catch (error) {
       console.error('Error adding book:', error);
       alert('Error adding book');
@@ -96,7 +102,7 @@ const AdminPage: React.FC = () => {
 
       alert('Book updated successfully!');
       setIsModalOpen(false);
-      fetchBooks();
+      fetchBooks(); // Refresh the book list
     } catch (error) {
       console.error('Error updating book:', error);
       alert('Error updating book');
@@ -115,11 +121,22 @@ const AdminPage: React.FC = () => {
 
       alert('Book deleted successfully!');
       setIsModalOpen(false);
-      fetchBooks();
+      fetchBooks(); // Refresh the book list
     } catch (error) {
       console.error('Error deleting book:', error);
       alert('Error deleting book');
     }
+  };
+
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const searchParams = {
+      title: searchTitle,
+      author: searchAuthor,
+      startYear: searchStartYear,
+      endYear: searchEndYear,
+    };
+    await fetchBooks(searchParams);
   };
 
   return (
@@ -169,8 +186,58 @@ const AdminPage: React.FC = () => {
           </div>
           <button className="submit-button" type="submit">Add Book</button>
         </form>
+        <hr />
+        <h2>Books</h2>
+        <form className="search-form" onSubmit={handleSearch}>
+          <div className='row'>
+            <div className='column'>
+              <div className="form-group">
+                <label>Title:</label>
+                <input
+                  type="text"
+                  id="searchTitle"
+                  placeholder="Search by title"
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Author:</label>
+                <input
+                  type="text"
+                  id="searchAuthor"
+                  placeholder="Search by author"
+                  value={searchAuthor}
+                  onChange={(e) => setSearchAuthor(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className='column'>
+              <div className="form-group">
+                <label>From:</label>
+                <input
+                  type="number"
+                  id="searchStartYear"
+                  placeholder="Search from year"
+                  value={searchStartYear}
+                  onChange={(e) => setSearchStartYear(Number(e.target.value))}
+                />
+              </div>
+              <div className="form-group">
+                <label>To:</label>
+                <input
+                  type="number"
+                  id="searchEndYear"
+                  placeholder="Search to year"
+                  value={searchEndYear}
+                  onChange={(e) => setSearchEndYear(Number(e.target.value))}
+                />
+              </div>
+            </div>
+          </div>
+          <button className="submit-button" type="submit">Search</button>
+        </form>
         <div className="book-list">
-          <h2>Books</h2>
           <ul>
             {books.map((book) => (
               <li key={book.id}>

@@ -324,6 +324,32 @@ button:active {
 .button-group .delete:hover{
   background-color: #b82929;
 }
+.row{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  
+}
+.search-form .column{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.search-form .form-group{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  align-self: auto
+}
+.search-form .form-group input{
+  width: 170px;
+  margin: 10px;
+}
+hr{
+  width: 100%;
+  margin: 50px;
+}
 /* Login Form */
 
 .loginPageBody{
